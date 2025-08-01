@@ -28,16 +28,16 @@
     <script src="js/bootstrap.min.js"  type="text/javascript"></script>
 
     <style>
-        /* This rule sets the background image for the entire page */
         body {
-            background-image: url('https://images.unsplash.com/photo-1550937617-6409893d56b0?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            /* Set the background image and its properties */
+            background-image: url('https://images.unsplash.com/photo-1549420556-b09b555776d6?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            background-attachment: fixed;
+            background-attachment: fixed; /* Makes the background fixed while content scrolls */
+            
+            /* Remove default margin to ensure the image covers the whole page */
             margin: 0;
-            padding: 0;
-            min-height: 100vh;
         }
 
         /* This pseudo-element creates a semi-transparent white overlay for better text readability */
@@ -48,31 +48,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.85);
-            z-index: -1;
-        }
-
-        /* The animation for the welcome heading */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Style for the animated heading */
-        .animated-heading {
-            font-size: 3rem; /* Adjust size as needed */
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-            padding-top: 150px;
-            animation: fadeInUp 2s ease-out 1s forwards; /* Apply the animation */
-            opacity: 0; /* Starts hidden to let the animation begin */
+            background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white */
+            z-index: -1; /* Puts the overlay behind the content */
         }
     </style>
 </head>
@@ -109,7 +86,7 @@
             <div class="col-md-12">
                 <?php if(@$_GET['q']==0)
                 {
-                    echo "<div class='text-center'><h1 class='animated-heading'>WELCOME TO Admin Page!!</h1></div>";
+                    echo "<center><h1 style='padding-top: 200px;'>WELCOME TO Admin Page!!</h1></center>";
                 }
 
                 if(@$_GET['q']== 2) 
