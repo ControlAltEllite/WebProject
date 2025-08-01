@@ -99,5 +99,5 @@
 
 		<script src="js/jquery.js"></script>
 		<script src="scripts/bootstrap/bootstrap.min.js"></script>
-	</body>
+	</body
 </html>
