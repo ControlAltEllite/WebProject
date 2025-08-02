@@ -1,201 +1,256 @@
 <?php
-  include_once 'database.php';
-  session_start();
-  $email=$_SESSION['email'];
+include_once 'database.php';
+session_start();
+$email=$_SESSION['email'];
 
-  if(isset($_SESSION['key']))
-  {
+if(isset($_SESSION['key']))
+{
     if(@$_GET['demail'] && $_SESSION['key']=='admin') 
     {
-      $demail=@$_GET['demail'];
-      $r1 = mysqli_query($con,"DELETE FROM rank WHERE email='$demail' ") or die('Error');
-      $r2 = mysqli_query($con,"DELETE FROM history WHERE email='$demail' ") or die('Error');
-      $result = mysqli_query($con,"DELETE FROM user WHERE email='$demail' ") or die('Error');
-      header("location:dashboard.php?q=1");
+        $demail=@$_GET['demail'];
+        $r1 = mysqli_query($con,"DELETE FROM rank WHERE email='$demail' ") or die('Error');
+        $r2 = mysqli_query($con,"DELETE FROM history WHERE email='$demail' ") or die('Error');
+        $result = mysqli_query($con,"DELETE FROM user WHERE email='$demail' ") or die('Error');
+        header("location:dashboard.php?q=1");
+        exit(); // Added exit after header redirect
     }
-  }
+}
 
-  if(isset($_SESSION['key']))
-  {
+if(isset($_SESSION['key']))
+{
     if(@$_GET['q']== 'rmquiz' && $_SESSION['key']=='admin') 
     {
-      $eid=@$_GET['eid'];
-      $result = mysqli_query($con,"SELECT * FROM questions WHERE eid='$eid' ") or die('Error');
-      while($row = mysqli_fetch_array($result)) 
-      {
-        $qid = $row['qid'];
-        $r1 = mysqli_query($con,"DELETE FROM options WHERE qid='$qid'") or die('Error');
-        $r2 = mysqli_query($con,"DELETE FROM answer WHERE qid='$qid' ") or die('Error');
-      }
-      $r3 = mysqli_query($con,"DELETE FROM questions WHERE eid='$eid' ") or die('Error');
-      $r4 = mysqli_query($con,"DELETE FROM quiz WHERE eid='$eid' ") or die('Error');
-      $r4 = mysqli_query($con,"DELETE FROM history WHERE eid='$eid' ") or die('Error');
-      header("location:dashboard.php?q=5");
+        $eid=@$_GET['eid'];
+        $result = mysqli_query($con,"SELECT * FROM questions WHERE eid='$eid' ") or die('Error');
+        while($row = mysqli_fetch_array($result)) 
+        {
+            $qid = $row['qid'];
+            $r1 = mysqli_query($con,"DELETE FROM options WHERE qid='$qid'") or die('Error');
+            $r2 = mysqli_query($con,"DELETE FROM answer WHERE qid='$qid' ") or die('Error');
+        }
+        $r3 = mysqli_query($con,"DELETE FROM questions WHERE eid='$eid' ") or die('Error');
+        $r4 = mysqli_query($con,"DELETE FROM quiz WHERE eid='$eid' ") or die('Error');
+        $r4 = mysqli_query($con,"DELETE FROM history WHERE eid='$eid' ") or die('Error');
+        header("location:dashboard.php?q=5");
+        exit(); // Added exit after header redirect
     }
-  }
+}
 
-  if(isset($_SESSION['key']))
-  {
+if(isset($_SESSION['key']))
+{
     if(@$_GET['q']== 'addquiz' && $_SESSION['key']=='admin') 
     {
-      $name = $_POST['name'];
-      $name= ucwords(strtolower($name));
-      $total = $_POST['total'];
-      $sahi = $_POST['right'];
-      $wrong = $_POST['wrong'];
-      $id=uniqid();
-      $q3=mysqli_query($con,"INSERT INTO quiz VALUES  ('$id','$name' , '$sahi' , '$wrong','$total', NOW())");
-      header("location:dashboard.php?q=4&step=2&eid=$id&n=$total");
+        $name = mysqli_real_escape_string($con, $_POST['name']); // Sanitize input
+        $name= ucwords(strtolower($name));
+        $total = mysqli_real_escape_string($con, $_POST['total']); // Sanitize input
+        $sahi = mysqli_real_escape_string($con, $_POST['right']); // Sanitize input
+        $wrong = mysqli_real_escape_string($con, $_POST['wrong']); // Sanitize input
+        $id=uniqid();
+        $q3=mysqli_query($con,"INSERT INTO quiz VALUES ('$id','$name' , '$sahi' , '$wrong','$total', NOW())");
+        header("location:dashboard.php?q=4&step=2&eid=$id&n=$total");
+        exit(); // Added exit after header redirect
     }
-  }
+}
 
-  if(isset($_SESSION['key']))
-  {
+if(isset($_SESSION['key']))
+{
     if(@$_GET['q']== 'addqns' && $_SESSION['key']=='admin') 
     {
-      $n=@$_GET['n'];
-      $eid=@$_GET['eid'];
-      $ch=@$_GET['ch'];
-      for($i=1;$i<=$n;$i++)
-      {
-        $qid=uniqid();
-        $qns=$_POST['qns'.$i];
-        $q3=mysqli_query($con,"INSERT INTO questions VALUES  ('$eid','$qid','$qns' , '$ch' , '$i')");
-        $oaid=uniqid();
-        $obid=uniqid();
-        $ocid=uniqid();
-        $odid=uniqid();
-        $a=$_POST[$i.'1'];
-        $b=$_POST[$i.'2'];
-        $c=$_POST[$i.'3'];
-        $d=$_POST[$i.'4'];
-        $qa=mysqli_query($con,"INSERT INTO options VALUES  ('$qid','$a','$oaid')") or die('Error61');
-        $qb=mysqli_query($con,"INSERT INTO options VALUES  ('$qid','$b','$obid')") or die('Error62');
-        $qc=mysqli_query($con,"INSERT INTO options VALUES  ('$qid','$c','$ocid')") or die('Error63');
-        $qd=mysqli_query($con,"INSERT INTO options VALUES  ('$qid','$d','$odid')") or die('Error64');
-        $e=$_POST['ans'.$i];
-        switch($e)
+        $n=@$_GET['n'];
+        $eid=@$_GET['eid'];
+        $ch=@$_GET['ch'];
+        for($i=1;$i<=$n;$i++)
         {
-          case 'a': $ansid=$oaid; break;
-          case 'b': $ansid=$obid; break;
-          case 'c': $ansid=$ocid; break;
-          case 'd': $ansid=$odid; break;
-          default: $ansid=$oaid;
+            $qid=uniqid();
+            $qns=mysqli_real_escape_string($con, $_POST['qns'.$i]); // Sanitize input
+            $q3=mysqli_query($con,"INSERT INTO questions VALUES ('$eid','$qid','$qns' , '$ch' , '$i')");
+            $oaid=uniqid();
+            $obid=uniqid();
+            $ocid=uniqid();
+            $odid=uniqid();
+            $a=mysqli_real_escape_string($con, $_POST[$i.'1']); // Sanitize input
+            $b=mysqli_real_escape_string($con, $_POST[$i.'2']); // Sanitize input
+            $c=mysqli_real_escape_string($con, $_POST[$i.'3']); // Sanitize input
+            $d=mysqli_real_escape_string($con, $_POST[$i.'4']); // Sanitize input
+            $qa=mysqli_query($con,"INSERT INTO options VALUES ('$qid','$a','$oaid')") or die('Error61');
+            $qb=mysqli_query($con,"INSERT INTO options VALUES ('$qid','$b','$obid')") or die('Error62');
+            $qc=mysqli_query($con,"INSERT INTO options VALUES ('$qid','$c','$ocid')") or die('Error63');
+            $qd=mysqli_query($con,"INSERT INTO options VALUES ('$qid','$d','$odid')") or die('Error64');
+            $e=mysqli_real_escape_string($con, $_POST['ans'.$i]); // Sanitize input
+            switch($e)
+            {
+                case 'a': $ansid=$oaid; break;
+                case 'b': $ansid=$obid; break;
+                case 'c': $ansid=$ocid; break;
+                case 'd': $ansid=$odid; break;
+                default: $ansid=$oaid; // Fallback
+            }
+            $qans=mysqli_query($con,"INSERT INTO answer VALUES ('$qid','$ansid')");
         }
-        $qans=mysqli_query($con,"INSERT INTO answer VALUES  ('$qid','$ansid')");
-      }
-      header("location:dashboard.php?q=0");
+        header("location:dashboard.php?q=0");
+        exit(); // Added exit after header redirect
     }
-  }
+}
 
-  if(@$_GET['q']== 'quiz' && @$_GET['step']== 2) 
-  {
+if(@$_GET['q']== 'quiz' && @$_GET['step']== 2) 
+{
     $eid=@$_GET['eid'];
     $sn=@$_GET['n'];
     $total=@$_GET['t'];
-    $ans=$_POST['ans'];
+    $ans=mysqli_real_escape_string($con, $_POST['ans']); // Sanitize input
     $qid=@$_GET['qid'];
     $q=mysqli_query($con,"SELECT * FROM answer WHERE qid='$qid' " );
     while($row=mysqli_fetch_array($q) )
-    {  $ansid=$row['ansid']; }
+    {   $ansid=$row['ansid']; }
     if($ans == $ansid)
     {
-      $q=mysqli_query($con,"SELECT * FROM quiz WHERE eid='$eid' " );
-      while($row=mysqli_fetch_array($q) )
-      {
-        $sahi=$row['sahi'];
-      }
-      if($sn == 1)
-      {
-        $q=mysqli_query($con,"INSERT INTO history VALUES('$email','$eid' ,'0','0','0','0',NOW())")or die('Error');
-      }
-      $q=mysqli_query($con,"SELECT * FROM history WHERE eid='$eid' AND email='$email' ")or die('Error115');
-      while($row=mysqli_fetch_array($q) )
-      {
-        $s=$row['score'];
-        $r=$row['sahi'];
-      }
-      $r++;
-      $s=$s+$sahi;
-      $q=mysqli_query($con,"UPDATE `history` SET `score`=$s,`level`=$sn,`sahi`=$r, date= NOW()  WHERE  email = '$email' AND eid = '$eid'")or die('Error124');
+        $q=mysqli_query($con,"SELECT * FROM quiz WHERE eid='$eid' " );
+        while($row=mysqli_fetch_array($q) )
+        {
+            $sahi=$row['sahi'];
+        }
+        if($sn == 1)
+        {
+            $q=mysqli_query($con,"INSERT INTO history VALUES('$email','$eid' ,'0','0','0','0',NOW())")or die('Error');
+        }
+        $q=mysqli_query($con,"SELECT * FROM history WHERE eid='$eid' AND email='$email' ")or die('Error115');
+        while($row=mysqli_fetch_array($q) )
+        {
+            $s=$row['score'];
+            $r=$row['sahi'];
+        }
+        $r++;
+        $s=$s+$sahi;
+        $q=mysqli_query($con,"UPDATE `history` SET `score`=$s,`level`=$sn,`sahi`=$r, date= NOW()  WHERE  email = '$email' AND eid = '$eid'")or die('Error124');
     } 
     else
     {
-      $q=mysqli_query($con,"SELECT * FROM quiz WHERE eid='$eid' " )or die('Error129');
-      while($row=mysqli_fetch_array($q) )
-      {
-        $wrong=$row['wrong'];
-      }
-      if($sn == 1)
-      {
-        $q=mysqli_query($con,"INSERT INTO history VALUES('$email','$eid' ,'0','0','0','0',NOW() )")or die('Error137');
-      }
-      $q=mysqli_query($con,"SELECT * FROM history WHERE eid='$eid' AND email='$email' " )or die('Error139');
-      while($row=mysqli_fetch_array($q) )
-      {
-        $s=$row['score'];
-        $w=$row['wrong'];
-      }
-      $w++;
-      $s=$s-$wrong;
-      $q=mysqli_query($con,"UPDATE `history` SET `score`=$s,`level`=$sn,`wrong`=$w, date=NOW() WHERE  email = '$email' AND eid = '$eid'")or die('Error147');
+        $q=mysqli_query($con,"SELECT * FROM quiz WHERE eid='$eid' " )or die('Error129');
+        while($row=mysqli_fetch_array($q) )
+        {
+            $wrong=$row['wrong'];
+        }
+        if($sn == 1)
+        {
+            $q=mysqli_query($con,"INSERT INTO history VALUES('$email','$eid' ,'0','0','0','0',NOW() )")or die('Error137');
+        }
+        $q=mysqli_query($con,"SELECT * FROM history WHERE eid='$eid' AND email='$email' " )or die('Error139');
+        while($row=mysqli_fetch_array($q) )
+        {
+            $s=$row['score'];
+            $w=$row['wrong'];
+        }
+        $w++;
+        $s=$s-$wrong;
+        $q=mysqli_query($con,"UPDATE `history` SET `score`=$s,`level`=$sn,`wrong`=$w, date=NOW() WHERE  email = '$email' AND eid = '$eid'")or die('Error147');
     }
     if($sn != $total)
     {
-      $sn++;
-      header("location:welcome.php?q=quiz&step=2&eid=$eid&n=$sn&t=$total")or die('Error152');
+        $sn++;
+        header("location:welcome.php?q=quiz&step=2&eid=$eid&n=$sn&t=$total")or die('Error152');
     }
-    else if( $_SESSION['key']!='suryapinky')
+    else if( $_SESSION['key']!='suryapinky') // This condition seems specific, ensure it's intended.
     {
-      $q=mysqli_query($con,"SELECT score FROM history WHERE eid='$eid' AND email='$email'" )or die('Error156');
-      while($row=mysqli_fetch_array($q) )
-      {
-        $s=$row['score'];
-      }
-      $q=mysqli_query($con,"SELECT * FROM rank WHERE email='$email'" )or die('Error161');
-      $rowcount=mysqli_num_rows($q);
-      if($rowcount == 0)
-      {
-        $q2=mysqli_query($con,"INSERT INTO rank VALUES('$email','$s',NOW())")or die('Error165');
-      }
-      else
-      {
+        $q=mysqli_query($con,"SELECT score FROM history WHERE eid='$eid' AND email='$email'" )or die('Error156');
         while($row=mysqli_fetch_array($q) )
         {
-          $sun=$row['score'];
+            $s=$row['score'];
         }
-        $sun=$s+$sun;
-        $q=mysqli_query($con,"UPDATE `rank` SET `score`=$sun ,time=NOW() WHERE email= '$email'")or die('Error174');
-      }
-      header("location:welcome.php?q=result&eid=$eid");
+        $q=mysqli_query($con,"SELECT * FROM rank WHERE email='$email'" )or die('Error161');
+        $rowcount=mysqli_num_rows($q);
+        if($rowcount == 0)
+        {
+            $q2=mysqli_query($con,"INSERT INTO rank VALUES('$email','$s',NOW())")or die('Error165');
+        }
+        else
+        {
+            while($row=mysqli_fetch_array($q) )
+            {
+                $sun=$row['score'];
+            }
+            $sun=$s+$sun;
+            $q=mysqli_query($con,"UPDATE `rank` SET `score`=$sun ,time=NOW() WHERE email= '$email'")or die('Error174');
+        }
+        header("location:welcome.php?q=result&eid=$eid");
     }
     else
     {
-      header("location:welcome.php?q=result&eid=$eid");
+        header("location:welcome.php?q=result&eid=$eid");
     }
-  }
+    exit(); // Added exit after header redirect
+}
 
-  if(@$_GET['q']== 'quizre' && @$_GET['step']== 25 ) 
-  {
+if(@$_GET['q']== 'quizre' && @$_GET['step']== 25 ) 
+{
     $eid=@$_GET['eid'];
     $n=@$_GET['n'];
     $t=@$_GET['t'];
     $q=mysqli_query($con,"SELECT score FROM history WHERE eid='$eid' AND email='$email'" )or die('Error156');
     while($row=mysqli_fetch_array($q) )
     {
-      $s=$row['score'];
+        $s=$row['score'];
     }
     $q=mysqli_query($con,"DELETE FROM `history` WHERE eid='$eid' AND email='$email' " )or die('Error184');
     $q=mysqli_query($con,"SELECT * FROM rank WHERE email='$email'" )or die('Error161');
     while($row=mysqli_fetch_array($q) )
     {
-      $sun=$row['score'];
+        $sun=$row['score'];
     }
     $sun=$sun-$s;
     $q=mysqli_query($con,"UPDATE `rank` SET `score`=$sun ,time=NOW() WHERE email= '$email'")or die('Error174');
     header("location:welcome.php?q=quiz&step=2&eid=$eid&n=1&t=$t");
-  }
+    exit(); // Added exit after header redirect
+}
+
+// --- START OF NEW CODE FOR HANDLING ESSAY SUBMISSION ---
+// Handle the submission of an essay question from the user side
+if(@$_GET['q']=='submit_essay') {
+    // 1. Get the data from the URL and the form
+    $essay_id = mysqli_real_escape_string($con, @$_GET['essay_id']); // Sanitize input
+    $answer = mysqli_real_escape_string($con, $_POST['answer']); // Sanitize input
+    $email = mysqli_real_escape_string($con, $_SESSION['email']); // Sanitize input
+
+    // 2. Insert the data into the new essay_answers table
+    $query = "INSERT INTO essay_answers (essay_id, email, answer, date) VALUES ('$essay_id', '$email', '$answer', NOW())";
+    $result = mysqli_query($con, $query) or die('Error submitting essay: ' . mysqli_error($con));
+
+    // 3. Redirect the user back to the welcome page with a success message
+    header("location:welcome.php?q=4&message=success");
+    exit(); // Always exit after a header redirect
+}
+// --- END OF NEW CODE FOR HANDLING ESSAY SUBMISSION ---
+
+// --- START OF NEW CODE FOR ADMIN ESSAY MANAGEMENT ---
+// Handle adding a new essay question from admin dashboard
+if(isset($_SESSION['key'])) {
+    if(@$_GET['q'] == 'addessay' && $_SESSION['key'] == 'admin') {
+        $title = mysqli_real_escape_string($con, $_POST['title']);
+        $question = mysqli_real_escape_string($con, $_POST['question']);
+        
+        $query = "INSERT INTO essay_questions (title, question, date) VALUES ('$title', '$question', NOW())";
+        $result = mysqli_query($con, $query) or die('Error adding essay question: ' . mysqli_error($con));
+        
+        header("location:dashboard.php?q=6&message=added");
+        exit();
+    }
+}
+
+// Handle removing an essay question from admin dashboard
+if(isset($_SESSION['key'])) {
+    if(@$_GET['q'] == 'rmessay' && $_SESSION['key'] == 'admin') {
+        $essay_id = mysqli_real_escape_string($con, @$_GET['essay_id']);
+        
+        // First, delete related answers to avoid foreign key constraint issues
+        $delete_answers_query = "DELETE FROM essay_answers WHERE essay_id='$essay_id'";
+        mysqli_query($con, $delete_answers_query) or die('Error deleting essay answers: ' . mysqli_error($con));
+
+        // Then, delete the essay question itself
+        $delete_question_query = "DELETE FROM essay_questions WHERE essay_id='$essay_id'";
+        mysqli_query($con, $delete_question_query) or die('Error deleting essay question: ' . mysqli_error($con));
+        
+        header("location:dashboard.php?q=7&message=removed");
+        exit();
+    }
+}
+// --- END OF NEW CODE FOR ADMIN ESSAY MANAGEMENT ---
 ?>
-
-
-
