@@ -259,7 +259,7 @@ if(isset($_SESSION['key']) && @$_GET['q'] == 'generate_ai_quiz' && $_SESSION['ke
         header("location:dashboard.php?q=4&error=missing_fields");
         exit();
     }
-    
+
     $ai_topic = mysqli_real_escape_string($con, $_POST['ai_topic']);
     $ai_num_questions = mysqli_real_escape_string($con, $_POST['ai_num_questions']);
     $ai_difficulty = mysqli_real_escape_string($con, $_POST['ai_difficulty']);
@@ -297,7 +297,7 @@ if(isset($_SESSION['key']) && @$_GET['q'] == 'generate_ai_quiz' && $_SESSION['ke
         error_log("Failed to decode JSON from AI API: " . json_last_error_msg() . "\nRaw response: " . $result);
         die("Error: Failed to parse AI quiz data. Invalid JSON response from AI service. Raw response: " . htmlspecialchars($result));
     }
-    
+
     // Check for an error message from the Flask app
     if (isset($quiz_questions['error'])) {
         die("AI Service Error: " . htmlspecialchars($quiz_questions['error']));
@@ -365,6 +365,76 @@ if(isset($_SESSION['key']) && @$_GET['q'] == 'generate_ai_quiz' && $_SESSION['ke
     }
 
     header("location:dashboard.php?q=5&message=Quiz generated and added successfully!");
+    exit();
+}
+
+// NEW SECTION: Logic for generating an AI essay question (admin)
+if(isset($_SESSION['key']) && @$_GET['q'] == 'generate_ai_essay' && $_SESSION['key'] == 'admin')
+{
+    // Validate required form fields
+    if (empty($_POST['ai_essay_topic']) || empty($_POST['ai_essay_difficulty'])) {
+        header("location:dashboard.php?q=6&error=missing_fields");
+        exit();
+    }
+
+    $ai_essay_topic = mysqli_real_escape_string($con, $_POST['ai_essay_topic']);
+    $ai_essay_difficulty = mysqli_real_escape_string($con, $_POST['ai_essay_difficulty']);
+
+    // --- Step 1: Call the Python Flask AI API ---
+    // NOTE: This assumes your Flask app has a new endpoint '/generate-essay'
+    $url = 'http://127.0.0.1:5000/generate-essay';
+    $data = [
+        'topic' => $ai_essay_topic,
+        'difficulty' => $ai_essay_difficulty
+    ];
+
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/json\r\n",
+            'method'  => 'POST',
+            'content' => json_encode($data),
+        ],
+    ];
+
+    $context  = stream_context_create($options);
+    $result = @file_get_contents($url, false, $context);
+
+    if ($result === FALSE) {
+        $error = error_get_last();
+        error_log("Failed to connect to AI API or receive response: " . print_r($error, true));
+        die("Error: Could not connect to the AI generation service. Please ensure the Python Flask app is running and the '/generate-essay' endpoint exists. Details: " . ($error['message'] ?? 'Unknown error'));
+    }
+
+    $essay_data = json_decode($result, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        error_log("Failed to decode JSON from AI API: " . json_last_error_msg() . "\nRaw response: " . $result);
+        die("Error: Failed to parse AI essay data. Invalid JSON response from AI service. Raw response: " . htmlspecialchars($result));
+    }
+
+    // Check for an error message from the Flask app
+    if (isset($essay_data['error'])) {
+        die("AI Service Error: " . htmlspecialchars($essay_data['error']));
+    }
+
+    // Check if the returned data is in the expected format
+    if (empty($essay_data) || !isset($essay_data['essay_question']) || !isset($essay_data['title'])) {
+        die("AI could not generate an essay question. The AI service returned an empty or invalid response.");
+    }
+
+    // --- Step 2: Insert into MySQL Database ---
+    $title = mysqli_real_escape_string($con, $essay_data['title']);
+    $question = mysqli_real_escape_string($con, $essay_data['essay_question']);
+
+    $query = "INSERT INTO essay_questions (title, question, date) VALUES ('$title', '$question', NOW())";
+    $insert_result = mysqli_query($con, $query);
+
+    if(!$insert_result){
+        error_log("MySQL error inserting into essay_questions table: " . mysqli_error($con));
+        die("Database error: Could not save the generated essay question.");
+    }
+
+    header("location:dashboard.php?q=6&message=Essay question generated and added successfully!");
     exit();
 }
 ?>
