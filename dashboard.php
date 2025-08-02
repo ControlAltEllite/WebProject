@@ -21,7 +21,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Dashboard | Online Quiz System</title>
     <link  rel="stylesheet" href="css/bootstrap.min.css"/>
-    <link  rel="stylesheet" href="css/bootstrap-theme.min.css"/>     
+    <link  rel="stylesheet" href="css/bootstrap-theme.min.css"/>      
     <link rel="stylesheet" href="css/welcome.css">
     <link  rel="stylesheet" href="css/font.css">
     <script src="js/jquery.js" type="text/javascript"></script>
@@ -70,12 +70,24 @@
                     <li <?php if(@$_GET['q']==0) echo'class="active"'; ?>><a href="dashboard.php?q=0">Home<span class="sr-only">(current)</span></a></li>
                     <li <?php if(@$_GET['q']==1) echo'class="active"'; ?>><a href="dashboard.php?q=1">User</a></li>
                     <li <?php if(@$_GET['q']==2) echo'class="active"'; ?>><a href="dashboard.php?q=2">Ranking</a></li>
+                    
                     <li class="dropdown <?php if(@$_GET['q']==4 || @$_GET['q']==5) echo'active"'; ?>">
-                    <li><a href="dashboard.php?q=4">Add Quiz</a></li>
-                    <li><a href="dashboard.php?q=5">Remove Quiz</a></li>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Quiz Management<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="dashboard.php?q=4">Add Quiz</a></li>
+                            <li><a href="dashboard.php?q=5">Remove Quiz</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown <?php if(@$_GET['q']==6 || @$_GET['q']==7) echo'active"'; ?>">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Essay Management<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="dashboard.php?q=6">Add Essay Question</a></li>
+                            <li><a href="dashboard.php?q=7">View/Remove Essays</a></li>
+                        </ul>
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li <?php echo''; ?> > <a href="logout1.php?q=dashboard.php"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>&nbsp;Log out</a></li>
+                    <li><a href="logout1.php?q=dashboard.php"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>&nbsp;Log out</a></li>
                 </ul>
             </div>
         </div>
@@ -84,11 +96,14 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <?php if(@$_GET['q']==0)
+                <?php 
+                // Home Page Content
+                if(@$_GET['q']==0)
                 {
                     echo "<center><h1 style='padding-top: 200px;'>WELCOME TO Admin Page!!</h1></center>";
                 }
 
+                // Ranking Page Content
                 if(@$_GET['q']== 2) 
                 {
                     $q=mysqli_query($con,"SELECT * FROM rank  ORDER BY score DESC " )or die('Error223');
@@ -113,13 +128,14 @@
                 }
                 ?>
                 <?php 
+                    // User List Page Content
                     if(@$_GET['q']==1) 
                     {
                         $result = mysqli_query($con,"SELECT * FROM user") or die('Error');
                         echo  '<div class="panel"><div class="table-responsive"><table class="table table-striped title1">
                         <tr><td><center><b>S.N.</b></center></td><td><center><b>Name</b></center></td><td><center><b>College</b></center></td><td><center><b>Email</b></center></td><td><center><b>Action</b></center></td></tr>';
                         $c=1;
-                        while($row = mysqli_fetch_array($result)) 
+                        while($row = mysqli_fetch_array($result))  
                         {
                             $name = $row['name'];
                             $email = $row['email'];
@@ -132,35 +148,36 @@
                 ?>
 
                 <?php
+                    // Add Quiz (Step 1)
                     if(@$_GET['q']==4 && !(@$_GET['step']) ) 
                     {
                         echo '<div class="row"><span class="title1" style="margin-left:40%;font-size:30px;color:#000;"><b>Enter Quiz Details</b></span><br /><br />
-                        <div class="col-md-3"></div><div class="col-md-6">   
+                        <div class="col-md-3"></div><div class="col-md-6">    
                         <form class="form-horizontal title1" name="form" action="update.php?q=addquiz"  method="POST">
                             <fieldset>
                                 <div class="form-group">
-                                    <label class="col-md-12 control-label" for="name"></label>   
+                                    <label class="col-md-12 control-label" for="name"></label>    
                                     <div class="col-md-12">
                                         <input id="name" name="name" placeholder="Enter Quiz title" class="form-control input-md" type="text">
                                     </div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="col-md-12 control-label" for="total"></label>   
+                                    <label class="col-md-12 control-label" for="total"></label>    
                                     <div class="col-md-12">
                                         <input id="total" name="total" placeholder="Enter total number of questions" class="form-control input-md" type="number">
                                     </div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="col-md-12 control-label" for="right"></label>   
+                                    <label class="col-md-12 control-label" for="right"></label>    
                                     <div class="col-md-12">
                                         <input id="right" name="right" placeholder="Enter marks on right answer" class="form-control input-md" min="0" type="number">
                                     </div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="col-md-12 control-label" for="wrong"></label>   
+                                    <label class="col-md-12 control-label" for="wrong"></label>    
                                     <div class="col-md-12">
                                         <input id="wrong" name="wrong" placeholder="Enter minus marks on wrong answer without sign" class="form-control input-md" min="0" type="number">
                                     </div>
@@ -168,7 +185,7 @@
                                 
                                 <div class="form-group">
                                     <label class="col-md-12 control-label" for=""></label>
-                                    <div class="col-md-12"> 
+                                    <div class="col-md-12">    
                                         <input  type="submit" style="margin-left:45%" class="btn btn-primary" value="Submit" class="btn btn-primary"/>
                                     </div>
                                 </div>
@@ -179,6 +196,7 @@
                 ?>
 
                 <?php
+                    // Add Quiz (Step 2 - Questions)
                     if(@$_GET['q']==4 && (@$_GET['step'])==2 ) 
                     {
                         echo ' 
@@ -187,53 +205,53 @@
                         <div class="col-md-3"></div><div class="col-md-6"><form class="form-horizontal title1" name="form" action="update.php?q=addqns&n='.@$_GET['n'].'&eid='.@$_GET['eid'].'&ch=4 "  method="POST">
                         <fieldset>
                         ';
-                
+                        
                         for($i=1;$i<=@$_GET['n'];$i++)
                         {
-                            echo '<b>Question number&nbsp;'.$i.'&nbsp;:</><br /><div class="form-group">
-                                            <label class="col-md-12 control-label" for="qns'.$i.' "></label>   
-                                            <div class="col-md-12">
-                                                <textarea rows="3" cols="5" name="qns'.$i.'" class="form-control" placeholder="Write question number '.$i.' here..."></textarea>  
+                            echo '<b>Question number&nbsp;'.$i.'&nbsp;:</b><br /><div class="form-group">
+                                                <label class="col-md-12 control-label" for="qns'.$i.' "></label>    
+                                                <div class="col-md-12">
+                                                    <textarea rows="3" cols="5" name="qns'.$i.'" class="form-control" placeholder="Write question number '.$i.' here..."></textarea>  
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-md-12 control-label" for="'.$i.'1"></label>   
-                                            <div class="col-md-12">
-                                                <input id="'.$i.'1" name="'.$i.'1" placeholder="Enter option a" class="form-control input-md" type="text">
+                                            <div class="form-group">
+                                                <label class="col-md-12 control-label" for="'.$i.'1"></label>    
+                                                <div class="col-md-12">
+                                                    <input id="'.$i.'1" name="'.$i.'1" placeholder="Enter option a" class="form-control input-md" type="text">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-md-12 control-label" for="'.$i.'2"></label>   
-                                            <div class="col-md-12">
-                                                <input id="'.$i.'2" name="'.$i.'2" placeholder="Enter option b" class="form-control input-md" type="text">
+                                            <div class="form-group">
+                                                <label class="col-md-12 control-label" for="'.$i.'2"></label>    
+                                                <div class="col-md-12">
+                                                    <input id="'.$i.'2" name="'.$i.'2" placeholder="Enter option b" class="form-control input-md" type="text">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-md-12 control-label" for="'.$i.'3"></label>   
-                                            <div class="col-md-12">
-                                                <input id="'.$i.'3" name="'.$i.'3" placeholder="Enter option c" class="form-control input-md" type="text">
+                                            <div class="form-group">
+                                                <label class="col-md-12 control-label" for="'.$i.'3"></label>    
+                                                <div class="col-md-12">
+                                                    <input id="'.$i.'3" name="'.$i.'3" placeholder="Enter option c" class="form-control input-md" type="text">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-md-12 control-label" for="'.$i.'4"></label>   
-                                            <div class="col-md-12">
-                                                <input id="'.$i.'4" name="'.$i.'4" placeholder="Enter option d" class="form-control input-md" type="text">
+                                            <div class="form-group">
+                                                <label class="col-md-12 control-label" for="'.$i.'4"></label>    
+                                                <div class="col-md-12">
+                                                    <input id="'.$i.'4" name="'.$i.'4" placeholder="Enter option d" class="form-control input-md" type="text">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <br />
-                                        <b>Correct answer</b>:<br />
-                                        <select id="ans'.$i.'" name="ans'.$i.'" placeholder="Choose correct answer " class="form-control input-md" >
-                                        <option value="a">Select answer for question '.$i.'</option>
-                                        <option value="a"> option a</option>
-                                        <option value="b"> option b</option>
-                                        <option value="c"> option c</option>
-                                        <option value="d"> option d</option> </select><br /><br />'; 
+                                            <br />
+                                            <b>Correct answer</b>:<br />
+                                            <select id="ans'.$i.'" name="ans'.$i.'" placeholder="Choose correct answer " class="form-control input-md" >
+                                            <option value="a">Select answer for question '.$i.'</option>
+                                            <option value="a"> option a</option>
+                                            <option value="b"> option b</option>
+                                            <option value="c"> option c</option>
+                                            <option value="d"> option d</option> </select><br /><br />'; 
                         }
                         echo '<div class="form-group">
-                                 <label class="col-md-12 control-label" for=""></label>
-                                 <div class="col-md-12"> 
-                                     <input  type="submit" style="margin-left:45%" class="btn btn-primary" value="Submit" class="btn btn-primary"/>
-                                 </div>
+                                   <label class="col-md-12 control-label" for=""></label>
+                                   <div class="col-md-12">    
+                                       <input  type="submit" style="margin-left:45%" class="btn btn-primary" value="Submit" class="btn btn-primary"/>
+                                   </div>
                                </div>
 
                         </fieldset>
@@ -242,6 +260,7 @@
                 ?>
 
                 <?php 
+                    // Remove Quiz Page Content
                     if(@$_GET['q']==5) 
                     {
                         $result = mysqli_query($con,"SELECT * FROM quiz ORDER BY date DESC") or die('Error');
@@ -260,6 +279,60 @@
                         echo '</table></div></div>';
                     }
                 ?>
+
+                <?php
+                    // Add Essay Question Page Content
+                    if(@$_GET['q']==6)
+                    {
+                        echo '
+                        <div class="row">
+                            <span class="title1" style="margin-left:40%;font-size:30px;color:#000;"><b>Enter Essay Question Details</b></span><br /><br />
+                            <div class="col-md-3"></div><div class="col-md-6">    
+                            <form class="form-horizontal title1" name="form" action="update.php?q=addessay" method="POST">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label class="col-md-12 control-label" for="title"></label>    
+                                        <div class="col-md-12">
+                                            <input id="title" name="title" placeholder="Enter Essay Question title" class="form-control input-md" type="text" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-12 control-label" for="question"></label>    
+                                        <div class="col-md-12">
+                                            <textarea rows="10" cols="5" id="question" name="question" class="form-control" placeholder="Write the essay question here..." required></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-12 control-label" for=""></label>
+                                        <div class="col-md-12">    
+                                            <input  type="submit" style="margin-left:45%" class="btn btn-primary" value="Submit" class="btn btn-primary"/>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </form></div>
+                        </div>';
+                    }
+                ?>
+                
+                <?php 
+                // View/Remove Essays Page Content
+                if(@$_GET['q']==7)  
+                {
+                    $result = mysqli_query($con,"SELECT * FROM essay_questions ORDER BY date DESC") or die('Error fetching essays: ' . mysqli_error($con));
+                    echo  '<div class="panel"><div class="table-responsive"><table class="table table-striped title1">
+                    <tr><td><center><b>S.N.</b></center></td><td><center><b>Topic</b></center></td><td><center><b>Date</b></center></td><td><center><b>Action</b></center></td></tr>';
+                    $c=1;
+                    while($row = mysqli_fetch_array($result)) {
+                        $title = $row['title'];
+                        $date = $row['date'];
+                        $essay_id = $row['essay_id'];
+                        echo '<tr><td><center>'.$c++.'</center></td><td><center>'.$title.'</center></td><td><center>'.$date.'</center></td>
+                        <td><center><b><a href="update.php?q=rmessay&essay_id='.$essay_id.'" class="pull-right btn sub1" style="margin:0px;background:red;color:black"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp;<span class="title1"><b>Remove</b></span></a></b></center></td></tr>';
+                    }
+                    echo '</table></div></div>';
+                }
+                ?>
+
             </div>
         </div>
     </div>
