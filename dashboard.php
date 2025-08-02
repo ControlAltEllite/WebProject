@@ -63,11 +63,13 @@
                             <li><a href="dashboard.php?q=8">Generate AI Quiz</a></li>
                         </ul>
                     </li>
-                    <li class="dropdown <?php if(@$_GET['q']==6 || @$_GET['q']==7) echo'active"'; ?>">
+                    <!-- Updated Essay Management Dropdown -->
+                    <li class="dropdown <?php if(@$_GET['q']==6 || @$_GET['q']==7 || @$_GET['q']==12) echo'active"'; ?>">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Essay Management<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="dashboard.php?q=6">Add Essay Questions</a></li>
                             <li><a href="dashboard.php?q=7">View/Remove Essays</a></li>
+                            <li><a href="dashboard.php?q=12">Generate AI Essay</a></li> <!-- New Link -->
                         </ul>
                     </li>
                     <li class="dropdown <?php if(@$_GET['q']==9 || @$_GET['q']==10) echo'active"'; ?>">
@@ -336,7 +338,7 @@
                 ?>
 
                 <?php
-                // Add Essay Questions Page Content
+                // Add Essay Questions Page Content (Manual)
                 if(@$_GET['q']==6)
                 {
                     echo '
@@ -385,6 +387,47 @@
                         <td><center><b><a href="update.php?q=rmessay&essay_id='.$essay_id.'" class="pull-right btn sub1" style="margin:0px;background:red;color:black"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp;<span class="title1"><b>Remove</b></span></a></b></center></td></tr>';
                     }
                     echo '</table></div></div>';
+                }
+                ?>
+
+                <!-- NEW SECTION: AI Essay Generation Form -->
+                <?php
+                if(@$_GET['q']==12)
+                {
+                    echo '
+                    <div class="row">
+                        <span class="title1" style="margin-left:40%;font-size:30px;color:#000;"><b>Generate AI Essay Question</b></span><br /><br />
+                        <div class="col-md-3"></div><div class="col-md-6">
+                        <form class="form-horizontal title1" name="ai_essay_form" action="update.php?q=generate_ai_essay" method="POST">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label class="col-md-12 control-label" for="ai_essay_topic"></label>
+                                    <div class="col-md-12">
+                                        <input id="ai_essay_topic" name="ai_essay_topic" placeholder="Enter essay topic (e.g., \'Impact of AI\', \'History of Rome\')" class="form-control input-md" type="text" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-12 control-label" for="ai_essay_difficulty"></label>
+                                    <div class="col-md-12">
+                                        <select id="ai_essay_difficulty" name="ai_essay_difficulty" class="form-control input-md">
+                                            <option value="easy">Easy</option>
+                                            <option value="medium" selected>Medium</option>
+                                            <option value="hard">Hard</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-12 control-label" for=""></label>
+                                    <div class="col-md-12">
+                                        <input  type="submit" style="margin-left:45%" class="btn btn-primary" value="Generate Essay Question" class="btn btn-primary"/>
+                                    </div>
+                                </div>
+
+                            </fieldset>
+                        </form></div>
+                    </div>';
                 }
                 ?>
 
