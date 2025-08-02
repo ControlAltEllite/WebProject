@@ -23,13 +23,10 @@ else
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Welcome | Online Quiz System</title>
-    <!-- Bootstrap CSS -->
     <link  rel="stylesheet" href="css/bootstrap.min.css"/>
     <link  rel="stylesheet" href="css/bootstrap-theme.min.css"/>     
-    <!-- Custom CSS for welcome page and fonts -->
     <link rel="stylesheet" href="css/welcome.css">
     <link  rel="stylesheet" href="css/font.css">
-    <!-- jQuery and Bootstrap JS -->
     <script src="js/jquery.js" type="text/javascript"></script>
     <script src="js/bootstrap.min.js"  type="text/javascript"></script>
     <style>
@@ -179,7 +176,7 @@ else
         .table .btn.sub1[style*="background:#1de9b6"]:hover {
             background-color: #218838 !important;
             border-color: #1e7e34 !important;
-               
+                
         }
         .table .btn.sub1[style*="background:red"] { /* Restart button */
             background-color: #dc3545 !important; /* Red */
@@ -271,32 +268,25 @@ else
                 <a class="navbar-brand" href="#"><b>Online Quiz System</b></a>
             </div>
 
-            <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-left">
-                    <!-- Home link, active when 'q' is 'home' or not set -->
                     <li <?php if(@$_GET['q']=='home' || !isset($_GET['q'])) echo'class="active"'; ?> >
                         <a href="welcome.php?q=home"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>&nbsp;Home<span class="sr-only">(current)</span></a>
                     </li>
-                    <!-- Link to MCQ Quizzes -->
                     <li <?php if(@$_GET['q']==1) echo'class="active"'; ?> >
                         <a href="welcome.php?q=1"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>&nbsp;MCQ Quizzes</a>
                     </li>
-                    <!-- Link to Essay Questions -->
-                    <li <?php if(@$_GET['q']==4) echo'class="active"'; ?> >
+                    <li <?php if(@$_GET['q']==4 || @$_GET['q']=='essay') echo'class="active"'; ?> >
                         <a href="welcome.php?q=4"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>&nbsp;Essay Questions</a>
                     </li>
-                    <!-- Link to History -->
                     <li <?php if(@$_GET['q']==2) echo'class="active"'; ?>> 
                         <a href="welcome.php?q=2"><span class="glyphicon glyphicon-time" aria-hidden="true"></span>&nbsp;History</a>
                     </li>
-                    <!-- Link to Ranking -->
                     <li <?php if(@$_GET['q']==3) echo'class="active"'; ?>> 
                         <a href="welcome.php?q=3"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;Ranking</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <!-- Logout link -->
                     <li> 
                         <a href="logout.php?q=welcome.php"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>&nbsp;Log out</a>
                     </li>
@@ -357,7 +347,7 @@ else
                     echo '</tbody></table></div></div>';
                 }?>
 
-                <?php
+                <?php 
                     // Display quiz questions
                     if(@$_GET['q']== 'quiz' && @$_GET['step']== 2) 
                     {
@@ -439,7 +429,7 @@ else
                             $q23=mysqli_query($con,"SELECT title FROM quiz WHERE  eid='$eid' " )or die('Error fetching quiz title: ' . mysqli_error($con));
 
                             while($row_title=mysqli_fetch_array($q23) ) // Renamed $row to $row_title to avoid conflict
-                            {  $title=$row_title['title'];  }
+                            {   $title=$row_title['title'];   }
                             $c++;
                             echo '<tr><td><center>'.$c.'</center></td><td><center>'.$title.'</center></td><td><center>'.$qa.'</center></td><td><center>'.$r.'</center></td><td><center>'.$w.'</center></td><td><center>'.$s.'</center></td></tr>';
                         }
@@ -474,21 +464,47 @@ else
                         echo '</tbody></table></div></div>';
                     }
 
-                    // New section for Essay Questions (Placeholder)
-                    if(@$_GET['q']== 4) 
+                    // --- START OF NEW CODE FOR ESSAY QUESTIONS ---
+                    // Display list of Essay Questions
+                    if(@$_GET['q']==4)
                     {
-                        echo '
-                        <div class="panel text-center">
-                            <h2 class="title1" style="color:#28a745; margin-bottom: 25px;">Essay Questions</h2>
-                            <p style="font-size: 1.1em; margin-bottom: 30px;">This section is under development and will soon display various essay questions for you to answer.</p>
-                            <p><i>(Content for essay questions will be loaded here in a future update.)</i></p>
-                            <br>
-                            <a href="welcome.php?q=home" class="btn btn-info">
-                                <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Back to Home
-                            </a>
-                        </div>
-                        ';
+                        $result = mysqli_query($con, "SELECT * FROM essay_questions ORDER BY date DESC") or die('Error fetching essay questions: ' . mysqli_error($con));
+                        echo '<div class="panel"><div class="table-responsive"><table class="table table-striped title1">
+                        <thead>
+                            <tr><td><center><b>S.N.</b></center></td><td><center><b>Topic</b></center></td><td><center><b>Action</b></center></td></tr>
+                        </thead>
+                        <tbody>';
+                        $c=1;
+                        while($row = mysqli_fetch_array($result)) {
+                            $title = $row['title'];
+                            $essay_id = $row['essay_id'];
+                            echo '<tr><td><center>'.$c++.'</center></td><td><center>'.$title.'</center></td><td><center><b><a href="welcome.php?q=essay&step=2&essay_id='.$essay_id.'" class="btn sub1" style="color:black;margin:0px;background:#1de9b6"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>Answer Question</b></span></a></b></center></td></tr>';
+                        }
+                        echo '</tbody></table></div></div>';
                     }
+                    // --- END OF NEW CODE FOR ESSAY QUESTIONS ---
+
+                    // --- START OF NEW CODE FOR DISPLAYING INDIVIDUAL ESSAY QUESTION ---
+                    // Display a single essay question
+                    if(@$_GET['q']=='essay' && @$_GET['step']==2)
+                    {
+                        $essay_id = @$_GET['essay_id'];
+                        $q = mysqli_query($con,"SELECT * FROM essay_questions WHERE essay_id='$essay_id' " ) or die('Error fetching essay question: ' . mysqli_error($con));
+                        $row = mysqli_fetch_array($q);
+                        $question_text = $row['question'];
+                        $question_title = $row['title'];
+
+                        echo '<div class="panel" style="margin:5%">';
+                        echo '<h2>'.$question_title.'</h2>';
+                        echo '<b>Question:<br /><br />'.$question_text.'</b><br /><br />';
+                        echo '<form action="update.php?q=submit_essay&essay_id='.$essay_id.'" method="POST" class="form-horizontal">';
+                        echo '<div class="form-group">';
+                        echo '<textarea name="answer" class="form-control" rows="10" placeholder="Type your answer here..." required></textarea>';
+                        echo '</div>';
+                        echo '<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-send" aria-hidden="true"></span>&nbsp;Submit Answer</button>';
+                        echo '</form></div>';
+                    }
+                    // --- END OF NEW CODE FOR DISPLAYING INDIVIDUAL ESSAY QUESTION ---
                 ?>
             </div>
         </div>
