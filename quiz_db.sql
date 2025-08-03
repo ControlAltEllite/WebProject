@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 02, 2025 at 08:52 AM
+-- Generation Time: Aug 03, 2025 at 10:51 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,6 +43,21 @@ INSERT INTO `admin` (`admin_id`, `email`, `password`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `ai_generated_questions`
+--
+
+CREATE TABLE `ai_generated_questions` (
+  `question_id` varchar(255) NOT NULL,
+  `quiz_title` varchar(255) NOT NULL,
+  `question` text NOT NULL,
+  `options` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`options`)),
+  `correct_answer` varchar(255) NOT NULL,
+  `date_created` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `answer`
 --
 
@@ -75,7 +90,22 @@ INSERT INTO `answer` (`qid`, `ansid`) VALUES
 ('687f9e1142279', '687f9e1142a69'),
 ('687f9e1144e43', '687f9e1145417'),
 ('687f9e1147c7c', '687f9e1148afe'),
-('687f9e114a6cf', '687f9e114adc7');
+('687f9e114a6cf', '687f9e114adc7'),
+('688dedf19010b', '688dedf19231f'),
+('688dedf194f8f', '688dedf19708a'),
+('688dedf198d16', '688dedf19ae07'),
+('688dedf19eb6f', '688dedf1a0a82'),
+('688dedf1a346d', '688dedf1afbcb'),
+('688df6dad0fe4', '688df6dad1fd7'),
+('688df6dad2d5f', '688df6dad3b83'),
+('688df6dad5298', '688df6dad636d'),
+('688df6dad7527', '688df6dad7a89'),
+('688df6dad9581', '688df6dada68f'),
+('688efec6a4f17', '688efec6a7dce'),
+('688efec6a8bfc', '688efec6a98c9'),
+('688efec6ab0a5', '688efec6ac719'),
+('688efec6afb62', '688efec6b0c90'),
+('688efec6b38b1', '688efec6b4e82');
 
 -- --------------------------------------------------------
 
@@ -101,7 +131,9 @@ INSERT INTO `essay_answers` (`answer_id`, `essay_id`, `email`, `answer`, `date`)
 (3, 1, 'rish@gmail.com', 'x,dnvlkansz v', '2025-08-02 11:37:20'),
 (4, 2, 'rish@gmail.com', 'x.lkfjgon bkdcvoiughd jxdnviughsd', '2025-08-02 11:37:30'),
 (5, 3, 'rish@gmail.com', 'x,fknlkidj  xjdnbjhd xndvhbihf', '2025-08-02 11:37:40'),
-(6, 4, 'rish@gmail.com', 'fkngik kxdnigohd kdngihs8d ndghiuod', '2025-08-02 11:37:50');
+(6, 4, 'rish@gmail.com', 'fkngik kxdnigohd kdngihs8d ndghiuod', '2025-08-02 11:37:50'),
+(7, 1, 'rish@gmail.com', ' jbjkbjnbbkjjjh', '2025-08-03 14:07:05'),
+(8, 1, 'ramrish@gmail.com', 'm,sdn cvkljfevnj', '2025-08-03 14:15:28');
 
 -- --------------------------------------------------------
 
@@ -151,7 +183,11 @@ INSERT INTO `history` (`email`, `eid`, `score`, `level`, `sahi`, `wrong`, `date`
 ('sas@gmail.com', '687c89841cea6', -18, 3, 0, 3, '2025-07-20 06:27:29'),
 ('zain@gmail.com', '687c89841cea6', -18, 3, 0, 3, '2025-07-22 14:04:09'),
 ('ra@gmail.com', '687f9c1353805', -2, 5, 1, 4, '2025-07-31 12:59:53'),
-('rish@gmail.com', '687f9c1353805', 1, 5, 2, 3, '2025-08-02 06:08:38');
+('rish@gmail.com', '687f9c1353805', 1, 5, 2, 3, '2025-08-02 06:08:38'),
+('rish@gmail.com', '688dedf18e3f3', -1, 1, 0, 1, '2025-08-02 10:54:18'),
+('rish@gmail.com', '688df6dad0977', -3, 3, 0, 3, '2025-08-02 11:31:02'),
+('rish@gmail.com', '688efec6a11bb', -1, 1, 0, 1, '2025-08-03 08:37:19'),
+('ramrish@gmail.com', '688efec6a11bb', -1, 5, 1, 4, '2025-08-03 08:45:59');
 
 -- --------------------------------------------------------
 
@@ -249,7 +285,67 @@ INSERT INTO `options` (`qid`, `option`, `optionid`) VALUES
 ('687f9e114a6cf', '', '687f9e114adc7'),
 ('687f9e114a6cf', '', '687f9e114add0'),
 ('687f9e114a6cf', '', '687f9e114add1'),
-('687f9e114a6cf', '', '687f9e114add2');
+('687f9e114a6cf', '', '687f9e114add2'),
+('688dedf19010b', 'To catch exceptions that were not caught by the \'except\' block.', '688dedf1913a4'),
+('688dedf19010b', 'To define code that will always be executed, regardless of whether an exception was raised or not.', '688dedf19231f'),
+('688dedf19010b', 'To define code that will only be executed if an exception was raised.', '688dedf192fff'),
+('688dedf19010b', 'To define code that will only be executed if no exception was raised.', '688dedf193a98'),
+('688dedf194f8f', 'Queue', '688dedf1958ec'),
+('688dedf194f8f', 'Linked List', '688dedf19665d'),
+('688dedf194f8f', 'Stack', '688dedf19708a'),
+('688dedf194f8f', 'Tree', '688dedf197a74'),
+('688dedf198d16', 'O(n)', '688dedf199645'),
+('688dedf198d16', 'O(n log n)', '688dedf19a323'),
+('688dedf198d16', 'O(log n)', '688dedf19ae07'),
+('688dedf198d16', 'O(1)', '688dedf19b80c'),
+('688dedf19eb6f', 'A way to create objects dynamically at runtime.', '688dedf19f601'),
+('688dedf19eb6f', 'A mechanism where a class inherits properties and methods from another class.', '688dedf1a0a82'),
+('688dedf19eb6f', 'A technique for hiding data within a class.', '688dedf1a133e'),
+('688dedf19eb6f', 'A process of converting one data type to another.', '688dedf1a1bac'),
+('688dedf1a346d', 'To create a new branch in a Git repository.', '688dedf1ae9ce'),
+('688dedf1a346d', 'To merge changes from one branch into another.', '688dedf1af332'),
+('688dedf1a346d', 'To copy a Git repository from a remote source to a local machine.', '688dedf1afbcb'),
+('688dedf1a346d', 'To commit changes to a Git repository.', '688dedf1b0434'),
+('688df6dad0fe4', 'Ensuring reliable data transfer between two adjacent nodes over a physical link.', '688df6dad159b'),
+('688df6dad0fe4', 'Defining the mechanical, electrical, and functional interface to the physical medium.', '688df6dad1ad9'),
+('688df6dad0fe4', 'Routing data packets from source to destination across multiple networks.', '688df6dad1fd7'),
+('688df6dad0fe4', 'Providing end-to-end communication between applications.', '688df6dad2432'),
+('688df6dad2d5f', 'To encrypt data transmitted over the network.', '688df6dad346c'),
+('688df6dad2d5f', 'To divide a network into smaller, more manageable subnetworks.', '688df6dad3b83'),
+('688df6dad2d5f', 'To assign IP addresses to devices on the network.', '688df6dad4136'),
+('688df6dad2d5f', 'To prevent unauthorized access to the network.', '688df6dad4824'),
+('688df6dad5298', 'HTTP', '688df6dad57f2'),
+('688df6dad5298', 'FTP', '688df6dad5d51'),
+('688df6dad5298', 'DNS', '688df6dad636d'),
+('688df6dad5298', 'SMTP', '688df6dad6980'),
+('688df6dad7527', 'TCP is connection-oriented, providing reliable data transfer, while UDP is connectionless and unreliable.', '688df6dad7a89'),
+('688df6dad7527', 'TCP is faster than UDP.', '688df6dad800c'),
+('688df6dad7527', 'TCP is used for streaming video, while UDP is used for email.', '688df6dad866b'),
+('688df6dad7527', 'TCP is a transport layer protocol, while UDP is an application layer protocol.', '688df6dad8b99'),
+('688df6dad9581', 'To provide wireless connectivity.', '688df6dada27d'),
+('688df6dad9581', 'To prevent unauthorized access to or from a private network.', '688df6dada68f'),
+('688df6dad9581', 'To speed up network performance.', '688df6dadaad6'),
+('688df6dad9581', 'To manage network IP addresses.', '688df6dadaf38'),
+('688efec6a4f17', 'HTTP', '688efec6a5eec'),
+('688efec6a4f17', 'FTP', '688efec6a6a30'),
+('688efec6a4f17', 'SMTP', '688efec6a7584'),
+('688efec6a4f17', 'HTTPS', '688efec6a7dce'),
+('688efec6a8bfc', 'To encrypt data', '688efec6a9293'),
+('688efec6a8bfc', 'To identify the network portion of an IP address', '688efec6a98c9'),
+('688efec6a8bfc', 'To assign IP addresses dynamically', '688efec6a9e8b'),
+('688efec6a8bfc', 'To prevent network congestion', '688efec6aa3f4'),
+('688efec6ab0a5', 'Router', '688efec6ab6df'),
+('688efec6ab0a5', 'Hub', '688efec6abfe3'),
+('688efec6ab0a5', 'Switch', '688efec6ac719'),
+('688efec6ab0a5', 'Firewall', '688efec6aea6c'),
+('688efec6afb62', 'To translate domain names to IP addresses', '688efec6b038d'),
+('688efec6afb62', 'To automatically assign IP addresses to devices', '688efec6b0c90'),
+('688efec6afb62', 'To encrypt network traffic', '688efec6b12fc'),
+('688efec6afb62', 'To prevent unauthorized access to the network', '688efec6b1a19'),
+('688efec6b38b1', 'Connectionless and unreliable', '688efec6b3ef6'),
+('688efec6b38b1', 'Connection-oriented and reliable', '688efec6b4e82'),
+('688efec6b38b1', 'Used for streaming video', '688efec6b576f'),
+('688efec6b38b1', 'Broadcast-based', '688efec6b5d32');
 
 -- --------------------------------------------------------
 
@@ -289,7 +385,22 @@ INSERT INTO `questions` (`eid`, `qid`, `qns`, `choice`, `sn`) VALUES
 ('687f9c1353805', '687f9e1142279', 'What is the purpose of  constructor in a class?', 4, 2),
 ('687f9c1353805', '687f9e1144e43', 'What is mean by \"Inheritance\" in OOP?', 4, 3),
 ('687f9c1353805', '687f9e1147c7c', '', 4, 4),
-('687f9c1353805', '687f9e114a6cf', '', 4, 5);
+('687f9c1353805', '687f9e114a6cf', '', 4, 5),
+('688dedf18e3f3', '688dedf19010b', 'What is the purpose of the \'finally\' block in a try-except-finally statement in Python?', 4, 1),
+('688dedf18e3f3', '688dedf194f8f', 'Which of the following data structures follows the Last-In, First-Out (LIFO) principle?', 4, 2),
+('688dedf18e3f3', '688dedf198d16', 'What is the time complexity of searching for an element in a balanced binary search tree?', 4, 3),
+('688dedf18e3f3', '688dedf19eb6f', 'In object-oriented programming, what is inheritance?', 4, 4),
+('688dedf18e3f3', '688dedf1a346d', 'What is the purpose of the \'git clone\' command?', 4, 5),
+('688df6dad0977', '688df6dad0fe4', 'Which of the following is the main function of the Network Layer in the OSI model?', 4, 1),
+('688df6dad0977', '688df6dad2d5f', 'What is the purpose of a subnet mask?', 4, 2),
+('688df6dad0977', '688df6dad5298', 'Which protocol is used for translating domain names to IP addresses?', 4, 3),
+('688df6dad0977', '688df6dad7527', 'What is the difference between TCP and UDP?', 4, 4),
+('688df6dad0977', '688df6dad9581', 'What is the role of a firewall in network security?', 4, 5),
+('688efec6a11bb', '688efec6a4f17', 'Which protocol is used for secure communication over the internet, ensuring data encryption and authentication?', 4, 1),
+('688efec6a11bb', '688efec6a8bfc', 'What is the purpose of a subnet mask in IP addressing?', 4, 2),
+('688efec6a11bb', '688efec6ab0a5', 'Which networking device operates at the Data Link Layer (Layer 2) of the OSI model and forwards data based on MAC addresses?', 4, 3),
+('688efec6a11bb', '688efec6afb62', 'What is the function of DHCP (Dynamic Host Configuration Protocol) on a network?', 4, 4),
+('688efec6a11bb', '688efec6b38b1', 'Which of the following is a characteristic of TCP (Transmission Control Protocol)?', 4, 5);
 
 -- --------------------------------------------------------
 
@@ -313,7 +424,10 @@ CREATE TABLE `quiz` (
 INSERT INTO `quiz` (`eid`, `title`, `sahi`, `wrong`, `total`, `date`) VALUES
 ('5b141b8009cf0', 'Php & Mysqli', 3, 1, 10, '2018-06-03 16:46:56'),
 ('687c89841cea6', 'Oop', 8, 6, 3, '2025-07-20 06:15:32'),
-('687f9c1353805', 'Advanced Oop', 2, 1, 5, '2025-07-22 14:11:31');
+('687f9c1353805', 'Advanced Oop', 2, 1, 5, '2025-07-22 14:11:31'),
+('688dedf18e3f3', 'programming', 3, 1, 5, '2025-08-02 10:52:33'),
+('688df6dad0977', 'networking', 3, 1, 5, '2025-08-02 11:30:34'),
+('688efec6a11bb', 'networking', 3, 1, 5, '2025-08-03 06:16:38');
 
 -- --------------------------------------------------------
 
@@ -335,7 +449,8 @@ INSERT INTO `rank` (`email`, `score`, `time`) VALUES
 ('sas@gmail.com', -18, '2025-07-20 06:27:29'),
 ('zain@gmail.com', -18, '2025-07-22 14:04:09'),
 ('ra@gmail.com', -2, '2025-07-31 12:59:53'),
-('rish@gmail.com', 1, '2025-08-02 06:08:38');
+('rish@gmail.com', 1, '2025-08-02 06:08:38'),
+('ramrish@gmail.com', -1, '2025-08-03 08:45:59');
 
 -- --------------------------------------------------------
 
@@ -375,6 +490,12 @@ ALTER TABLE `admin`
   ADD PRIMARY KEY (`admin_id`);
 
 --
+-- Indexes for table `ai_generated_questions`
+--
+ALTER TABLE `ai_generated_questions`
+  ADD PRIMARY KEY (`question_id`);
+
+--
 -- Indexes for table `essay_answers`
 --
 ALTER TABLE `essay_answers`
@@ -407,13 +528,13 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `essay_answers`
 --
 ALTER TABLE `essay_answers`
-  MODIFY `answer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `answer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `essay_questions`
 --
 ALTER TABLE `essay_questions`
-  MODIFY `essay_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `essay_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
