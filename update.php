@@ -252,189 +252,127 @@ if(isset($_SESSION['key'])) {
 }
 
 // NEW SECTION: Logic for generating an AI quiz (admin)
-if(isset($_SESSION['key']) && @$_GET['q'] == 'generate_ai_quiz' && $_SESSION['key'] == 'admin')
+if(isset($_SESSION['key']))
 {
-    // Validate required form fields
-    if (empty($_POST['ai_topic']) || empty($_POST['ai_num_questions']) || empty($_POST['ai_difficulty'])) {
-        header("location:dashboard.php?q=4&error=missing_fields");
+    if(@$_GET['q']=='generate_ai_quiz' && $_SESSION['key']=='admin')
+    {
+        $ai_topic = mysqli_real_escape_string($con, $_POST['ai_topic']);
+        $ai_num_questions = mysqli_real_escape_string($con, $_POST['ai_num_questions']);
+        $ai_difficulty = mysqli_real_escape_string($con, $_POST['ai_difficulty']);
+        $marks_right = mysqli_real_escape_string($con, $_POST['ai_marks_right']);
+        $marks_wrong = mysqli_real_escape_string($con, $_POST['ai_marks_wrong']);
+
+        // --- Step 1: Call the Python Flask AI API ---
+        $url = 'http://127.0.0.1:5000/generate-quiz';
+        $data = [
+            'topic' => $ai_topic,
+            'num_questions' => $ai_num_questions,
+            'difficulty' => $ai_difficulty
+        ];
+
+        $options = [
+            'http' => [
+                'header'  => "Content-type: application/json\r\n",
+                'method'  => 'POST',
+                'content' => json_encode($data),
+                'timeout' => 30 // Set a timeout for the request
+            ],
+        ];
+
+        $context  = stream_context_create($options);
+
+        // Use a try-catch block to handle the connection failure more gracefully
+        $result = @file_get_contents($url, false, $context);
+
+        if ($result === FALSE) {
+            $error = error_get_last();
+            // Display a more specific error message to the user
+            $errorMessage = "Error: Could not connect to the AI generation service. Please ensure the Python Flask app is running. Details: " . ($error['message'] ?? 'Unknown error');
+            // We'll pass this error message back to the dashboard page
+            header("location:dashboard.php?q=8&error=" . urlencode($errorMessage));
+            exit();
+        }
+
+        $quiz_questions = json_decode($result, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("Failed to decode JSON from AI API: " . json_last_error_msg() . "\nRaw response: " . $result);
+            die("Error: Failed to parse AI quiz data. Invalid JSON response from AI service.");
+        }
+
+        // --- Step 2: Insert into MySQL Database ---
+        $eid=uniqid();
+        $title = mysqli_real_escape_string($con, $ai_topic);
+        $total_questions = count($quiz_questions);
+
+        $query_quiz = "INSERT INTO `quiz` VALUES ('$eid','$title','$marks_right','$marks_wrong','$total_questions', NOW())";
+        $insert_quiz = mysqli_query($con,$query_quiz);
+
+        if(!$insert_quiz){
+            error_log("MySQL error inserting into quiz table: " . mysqli_error($con));
+            die("Database error: Could not save quiz details.");
+        }
+
+        $sn = 1;
+        foreach ($quiz_questions as $question_data) {
+            $qid = uniqid();
+            $qns = mysqli_real_escape_string($con, $question_data['question']);
+            $choice = count($question_data['options']);
+
+            $query_qns = "INSERT INTO `questions` VALUES ('$eid','$qid','$qns','$choice','$sn')";
+            $insert_qns = mysqli_query($con,$query_qns);
+
+            if(!$insert_qns){
+                error_log("MySQL error inserting into questions table for QID $qid: " . mysqli_error($con));
+                continue;
+            }
+
+            $correct_ans_option_id = '';
+            foreach ($question_data['options'] as $opt_index => $option_text) {
+                $optionid = uniqid();
+                $option_text_escaped = mysqli_real_escape_string($con, $option_text);
+                $query_opt = "INSERT INTO `options` VALUES ('$qid','$option_text_escaped','$optionid')";
+                $insert_opt = mysqli_query($con,$query_opt);
+
+                if(!$insert_opt){
+                    error_log("MySQL error inserting into options table for QID $qid, Option $option_text: " . mysqli_error($con));
+                }
+
+                if ($option_text == $question_data['answer']) {
+                    $correct_ans_option_id = $optionid;
+                }
+            }
+
+            if ($correct_ans_option_id) {
+                $query_ans = "INSERT INTO `answer` VALUES ('$qid','$correct_ans_option_id')";
+                $insert_ans = mysqli_query($con,$query_ans);
+                if(!$insert_ans){
+                    error_log("MySQL error inserting into answer table for QID $qid: " . mysqli_error($con));
+                }
+            } else {
+                error_log("Warning: No correct answer found for question: " . $qns);
+            }
+
+            $sn++;
+        }
+
+        // Redirect to a dashboard page with a success message
+        header("location:dashboard.php?q=5&message=Quiz generated and added successfully!");
         exit();
     }
-
-    $ai_topic = mysqli_real_escape_string($con, $_POST['ai_topic']);
-    $ai_num_questions = mysqli_real_escape_string($con, $_POST['ai_num_questions']);
-    $ai_difficulty = mysqli_real_escape_string($con, $_POST['ai_difficulty']);
-    $marks_right = mysqli_real_escape_string($con, $_POST['ai_marks_right']);
-    $marks_wrong = mysqli_real_escape_string($con, $_POST['ai_marks_wrong']);
-
-    // --- Step 1: Call the Python Flask AI API ---
-    $url = 'http://127.0.0.1:5000/generate-quiz';
-    $data = [
-        'topic' => $ai_topic,
-        'num_questions' => $ai_num_questions,
-        'difficulty' => $ai_difficulty
-    ];
-
-    $options = [
-        'http' => [
-            'header'  => "Content-type: application/json\r\n",
-            'method'  => 'POST',
-            'content' => json_encode($data),
-        ],
-    ];
-
-    $context  = stream_context_create($options);
-    $result = @file_get_contents($url, false, $context);
-
-    if ($result === FALSE) {
-        $error = error_get_last();
-        error_log("Failed to connect to AI API or receive response: " . print_r($error, true));
-        die("Error: Could not connect to the AI generation service. Please ensure the Python Flask app is running. Details: " . ($error['message'] ?? 'Unknown error'));
-    }
-
-    $quiz_questions = json_decode($result, true);
-
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        error_log("Failed to decode JSON from AI API: " . json_last_error_msg() . "\nRaw response: " . $result);
-        die("Error: Failed to parse AI quiz data. Invalid JSON response from AI service. Raw response: " . htmlspecialchars($result));
-    }
-
-    // Check for an error message from the Flask app
-    if (isset($quiz_questions['error'])) {
-        die("AI Service Error: " . htmlspecialchars($quiz_questions['error']));
-    }
-
-    // Check if the returned data is not in the expected format (e.g., an empty array)
-    if (empty($quiz_questions) || !is_array($quiz_questions)) {
-        die("AI could not generate quiz questions. The AI service returned an empty or invalid response.");
-    }
-
-    // --- Step 2: Insert into MySQL Database ---
-    $eid=uniqid();
-    $title = mysqli_real_escape_string($con, $ai_topic);
-    $total_questions = count($quiz_questions);
-
-    $query_quiz = "INSERT INTO `quiz` VALUES ('$eid','$title','$marks_right','$marks_wrong','$total_questions', NOW())";
-    $insert_quiz = mysqli_query($con,$query_quiz);
-
-    if(!$insert_quiz){
-        error_log("MySQL error inserting into quiz table: " . mysqli_error($con));
-        die("Database error: Could not save quiz details.");
-    }
-
-    $sn = 1;
-    foreach ($quiz_questions as $question_data) {
-        $qid = uniqid();
-        $qns = mysqli_real_escape_string($con, $question_data['question']);
-        $choice = count($question_data['options']);
-
-        $query_qns = "INSERT INTO `questions` VALUES ('$eid','$qid','$qns','$choice','$sn')";
-        $insert_qns = mysqli_query($con,$query_qns);
-
-        if(!$insert_qns){
-            error_log("MySQL error inserting into questions table for QID $qid: " . mysqli_error($con));
-            continue;
-        }
-
-        $correct_ans_option_id = '';
-        foreach ($question_data['options'] as $opt_index => $option_text) {
-            $optionid = uniqid();
-            $option_text_escaped = mysqli_real_escape_string($con, $option_text);
-            $query_opt = "INSERT INTO `options` VALUES ('$qid','$option_text_escaped','$optionid')";
-            $insert_opt = mysqli_query($con,$query_opt);
-
-            if(!$insert_opt){
-                error_log("MySQL error inserting into options table for QID $qid, Option $option_text: " . mysqli_error($con));
-            }
-
-            if ($option_text == $question_data['answer']) {
-                $correct_ans_option_id = $optionid;
-            }
-        }
-
-        if ($correct_ans_option_id) {
-            $query_ans = "INSERT INTO `answer` VALUES ('$qid','$correct_ans_option_id')";
-            $insert_ans = mysqli_query($con,$query_ans);
-            if(!$insert_ans){
-                error_log("MySQL error inserting into answer table for QID $qid: " . mysqli_error($con));
-            }
-        } else {
-            error_log("Warning: No correct answer found for question: " . $qns);
-        }
-
-        $sn++;
-    }
-
-    header("location:dashboard.php?q=5&message=Quiz generated and added successfully!");
-    exit();
 }
 
-// NEW SECTION: Logic for generating an AI essay question (admin)
-if(isset($_SESSION['key']) && @$_GET['q'] == 'generate_ai_essay' && $_SESSION['key'] == 'admin')
-{
-    // Validate required form fields
-    if (empty($_POST['ai_essay_topic']) || empty($_POST['ai_essay_difficulty'])) {
-        header("location:dashboard.php?q=6&error=missing_fields");
+// Logic for removing an AI generated question (admin)
+if(isset($_SESSION['key'])) {
+    if(@$_GET['q'] == 'rm_ai_qns' && $_SESSION['key'] == 'admin') {
+        $question_id = mysqli_real_escape_string($con, @$_GET['question_id']);
+        
+        $delete_query = "DELETE FROM ai_generated_questions WHERE question_id='$question_id'";
+        mysqli_query($con, $delete_query) or die('Error deleting AI question: ' . mysqli_error($con));
+
+        header("location:dashboard.php?q=9");
         exit();
     }
-
-    $ai_essay_topic = mysqli_real_escape_string($con, $_POST['ai_essay_topic']);
-    $ai_essay_difficulty = mysqli_real_escape_string($con, $_POST['ai_essay_difficulty']);
-
-    // --- Step 1: Call the Python Flask AI API ---
-    // NOTE: This assumes your Flask app has a new endpoint '/generate-essay'
-    $url = 'http://127.0.0.1:5000/generate-essay';
-    $data = [
-        'topic' => $ai_essay_topic,
-        'difficulty' => $ai_essay_difficulty
-    ];
-
-    $options = [
-        'http' => [
-            'header'  => "Content-type: application/json\r\n",
-            'method'  => 'POST',
-            'content' => json_encode($data),
-        ],
-    ];
-
-    $context  = stream_context_create($options);
-    $result = @file_get_contents($url, false, $context);
-
-    if ($result === FALSE) {
-        $error = error_get_last();
-        error_log("Failed to connect to AI API or receive response: " . print_r($error, true));
-        die("Error: Could not connect to the AI generation service. Please ensure the Python Flask app is running and the '/generate-essay' endpoint exists. Details: " . ($error['message'] ?? 'Unknown error'));
-    }
-
-    $essay_data = json_decode($result, true);
-
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        error_log("Failed to decode JSON from AI API: " . json_last_error_msg() . "\nRaw response: " . $result);
-        die("Error: Failed to parse AI essay data. Invalid JSON response from AI service. Raw response: " . htmlspecialchars($result));
-    }
-
-    // Check for an error message from the Flask app
-    if (isset($essay_data['error'])) {
-        die("AI Service Error: " . htmlspecialchars($essay_data['error']));
-    }
-
-    // Check if the returned data is in the expected format
-    if (empty($essay_data) || !isset($essay_data['essay_question']) || !isset($essay_data['title'])) {
-        die("AI could not generate an essay question. The AI service returned an empty or invalid response.");
-    }
-
-    // --- Step 2: Insert into MySQL Database ---
-    $title = mysqli_real_escape_string($con, $essay_data['title']);
-    $question = mysqli_real_escape_string($con, $essay_data['essay_question']);
-
-    $query = "INSERT INTO essay_questions (title, question, date) VALUES ('$title', '$question', NOW())";
-    $insert_result = mysqli_query($con, $query);
-
-    if(!$insert_result){
-        error_log("MySQL error inserting into essay_questions table: " . mysqli_error($con));
-        die("Database error: Could not save the generated essay question.");
-    }
-
-    header("location:dashboard.php?q=6&message=Essay question generated and added successfully!");
-    exit();
 }
+
 ?>
