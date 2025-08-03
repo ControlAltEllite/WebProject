@@ -9,7 +9,7 @@ app = Flask(__name__)
 CORS(app)  # This is important for allowing cross-origin requests from your PHP server
 
 # --- CRITICAL: You must provide your own Gemini API key here. ---
-# 1. Go to https://aistudio.google.com/app/apikey
+# 1. Go to https://aistudio.google.com/app/apikeyins
 # 2. Click "Create API key in new project" or "Create API key".
 # 3. Copy the key and paste it below, replacing "YOUR_GEMINI_API_KEY_HERE".
 #
@@ -153,4 +153,4 @@ def generate_quiz():
         return jsonify({"error": "An internal server error occurred."}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=5000)
