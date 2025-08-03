@@ -55,29 +55,24 @@
                     <li <?php if(@$_GET['q']==0) echo'class="active"'; ?>><a href="dashboard.php?q=0">Home<span class="sr-only">(current)</span></a></li>
                     <li <?php if(@$_GET['q']==1) echo'class="active"'; ?>><a href="dashboard.php?q=1">User</a></li>
                     <li <?php if(@$_GET['q']==2) echo'class="active"'; ?>><a href="dashboard.php?q=2">Ranking</a></li>
-                    <li class="dropdown <?php if(@$_GET['q']==4 || @$_GET['q']==5 || @$_GET['q']==8) echo'active"'; ?>">
+                    <li class="dropdown <?php if(@$_GET['q']==4 || @$_GET['q']==5 || @$_GET['q']==8 || @$_GET['q']==9) echo'active"'; ?>">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Quiz Management<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="dashboard.php?q=4">Add Quiz</a></li>
                             <li><a href="dashboard.php?q=5">Remove Quiz</a></li>
                             <li><a href="dashboard.php?q=8">Generate AI Quiz</a></li>
+                            <li><a href="dashboard.php?q=9">AI Generated Questions</a></li>
                         </ul>
                     </li>
-                    <!-- Updated Essay Management Dropdown -->
-                    <li class="dropdown <?php if(@$_GET['q']==6 || @$_GET['q']==7 || @$_GET['q']==12) echo'active"'; ?>">
+                    <li class="dropdown <?php if(@$_GET['q']==6 || @$_GET['q']==7) echo'active"'; ?>">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Essay Management<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="dashboard.php?q=6">Add Essay Questions</a></li>
                             <li><a href="dashboard.php?q=7">View/Remove Essays</a></li>
-                            <li><a href="dashboard.php?q=12">Generate AI Essay</a></li> <!-- New Link -->
                         </ul>
                     </li>
                     <li class="dropdown <?php if(@$_GET['q']==9 || @$_GET['q']==10) echo'active"'; ?>">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feedback<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="dashboard.php?q=9">Feedbacks</a></li>
-                            <li><a href="dashboard.php?q=10">Suggestions</a></li>
-                        </ul>
+                        
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
@@ -318,6 +313,51 @@
                 ?>
 
                 <?php
+                    // NEW SECTION: View AI Generated Questions for Admin
+                    if(@$_GET['q']==9) {
+                        $result = mysqli_query($con,"SELECT * FROM ai_generated_questions ORDER BY date_created DESC") or die('Error fetching AI questions: ' . mysqli_error($con));
+                        
+                        echo '<div class="panel"><div class="table-responsive"><table class="table table-striped title1">
+                        <tr>
+                            <td><center><b>S.N.</b></center></td>
+                            <td><center><b>Quiz Title</b></center></td>
+                            <td><center><b>Question</b></center></td>
+                            <td><center><b>Options</b></center></td>
+                            <td><center><b>Correct Answer</b></center></td>
+                            <td><center><b>Action</b></center></td>
+                        </tr>';
+                        
+                        $c=1;
+                        while($row = mysqli_fetch_array($result)) {
+                            $question_id = $row['question_id'];
+                            $quiz_title = $row['quiz_title'];
+                            $question = $row['question'];
+                            $options_json = $row['options'];
+                            $correct_answer = $row['correct_answer'];
+                            
+                            // Decode the JSON options to display them
+                            $options = json_decode($options_json, true);
+                            $options_str = '';
+                            if (is_array($options)) {
+                                foreach ($options as $option) {
+                                    $options_str .= $option . '<br>';
+                                }
+                            }
+                            
+                            echo '<tr>
+                                <td><center>'.$c++.'</center></td>
+                                <td><center>'.$quiz_title.'</center></td>
+                                <td><center>'.$question.'</center></td>
+                                <td><center>'.$options_str.'</center></td>
+                                <td><center>'.$correct_answer.'</center></td>
+                                <td><center><b><a href="update.php?q=rm_ai_qns&question_id='.$question_id.'" class="pull-right btn sub1" style="margin:0px;background:red;color:black"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp;<span class="title1"><b>Remove</b></span></a></b></center></td>
+                            </tr>';
+                        }
+                        echo '</table></div></div>';
+                    }
+                ?>
+
+                <?php
                 // Remove Quiz Page Content
                 if(@$_GET['q']==5)
                 {
@@ -338,7 +378,7 @@
                 ?>
 
                 <?php
-                // Add Essay Questions Page Content (Manual)
+                // Add Essay Questions Page Content
                 if(@$_GET['q']==6)
                 {
                     echo '
@@ -390,51 +430,8 @@
                 }
                 ?>
 
-                <!-- NEW SECTION: AI Essay Generation Form -->
-                <?php
-                if(@$_GET['q']==12)
-                {
-                    echo '
-                    <div class="row">
-                        <span class="title1" style="margin-left:40%;font-size:30px;color:#000;"><b>Generate AI Essay Question</b></span><br /><br />
-                        <div class="col-md-3"></div><div class="col-md-6">
-                        <form class="form-horizontal title1" name="ai_essay_form" action="update.php?q=generate_ai_essay" method="POST">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label class="col-md-12 control-label" for="ai_essay_topic"></label>
-                                    <div class="col-md-12">
-                                        <input id="ai_essay_topic" name="ai_essay_topic" placeholder="Enter essay topic (e.g., \'Impact of AI\', \'History of Rome\')" class="form-control input-md" type="text" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="col-md-12 control-label" for="ai_essay_difficulty"></label>
-                                    <div class="col-md-12">
-                                        <select id="ai_essay_difficulty" name="ai_essay_difficulty" class="form-control input-md">
-                                            <option value="easy">Easy</option>
-                                            <option value="medium" selected>Medium</option>
-                                            <option value="hard">Hard</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="col-md-12 control-label" for=""></label>
-                                    <div class="col-md-12">
-                                        <input  type="submit" style="margin-left:45%" class="btn btn-primary" value="Generate Essay Question" class="btn btn-primary"/>
-                                    </div>
-                                </div>
-
-                            </fieldset>
-                        </form></div>
-                    </div>';
-                }
-                ?>
-
             </div>
         </div>
     </div>
 </body>
 </html>
-
-
